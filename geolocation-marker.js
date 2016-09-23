@@ -12,7 +12,7 @@
             draggable: !1,
             flat: !0,
             icon: {
-                //url: "naruto.gif",
+                url: "naruto.gif",
                 size: new google.maps.Size(1000, 1000),
                 scaledSize: new google.maps.Size(50, 50),
                 origin: new google.maps.Point(0, 0),
