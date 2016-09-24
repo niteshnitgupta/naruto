@@ -65,7 +65,8 @@
           zoom: 20,
           center: new google.maps.LatLng(-34.397, 150.644),
           mapTypeId: google.maps.MapTypeId.ROADMAP,
-          disableDefaultUI: true
+          disableDefaultUI: true,
+          draggable: false
         };
         map = new google.maps.Map(document.getElementById('map_canvas'), mapOptions);
 
@@ -143,6 +144,5 @@
       </div>
     </footer>
 -->
-
   </body>
 </html>
