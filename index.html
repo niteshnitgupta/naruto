@@ -60,20 +60,39 @@
         var map, GeoMarker, aaa;
         var val_lat, lat_lon, userJson, jutsuJson;
         var isColor = "blue";
-        
-        function displayMarker (json, image) {
+        var userMarkers = [];
+        var jutsuMarkers = [];
+
+        function DeleteAllUserMarkers() {
+                for (var i = 0; i < userMarkers.length; i++) {
+                    userMarkers[i].setMap(null);
+                }
+                userMarkers = [];
+        }
+
+        function DeleteAllJutsuMarkers() {
+                for (var i = 0; i < jutsuMarkers.length; i++) {
+                    jutsuMarkers[i].setMap(null);
+                }
+                jutsuMarkers = [];
+        }
+
+        function displayMarker (json, image, type) {
             for (var i = 0, length = json.length; i < length; i++) {
                     var data1 = json[i];
                     console.log(data1);
-                    lat = data1.location.coordinates[0];
-                    lon = data1.location.coordinates[1];
+                    lat = data1.location.coordinates[1];
+                    lon = data1.location.coordinates[0];
                     latLng = new google.maps.LatLng(lat, lon);
                     var marker = new google.maps.Marker({
                         position: latLng,
-                        map: map,
-                        icon: image
+                        map: map
                     });
                     marker.setMap(map);
+                    marker.addListener('click', function() {
+                      alert("clicked");
+                    });
+                    userMarkers.push(marker);
                 }
         }
 
@@ -110,25 +129,23 @@
             });
             GeoMarker.setMap(map);
 
-            val_lat = 76.810293;
-            val_lon = 29.906944;
+            val_lon = 77.71621079999996;
+            val_lat = 12.9508892;
 
             var socket = io('http://localhost:3000/myLocation', {
-                query: "username=U100&lat=" + val_lat + "&lon=" + val_lon
+                query: "username=U01&lat=" + val_lat + "&lon=" + val_lon
             });
             var json;
             socket.on('nearbyuser', function(data) {
-               // json = data;
                 userJson = data;
-                if (isColor == "red"){
+                if (isColor == "blue"){
                     displayMarker(userJson,"images/temp-jutsu.png");
                 }
             });
 
             socket.on('nearbyjutsu', function(data) {
-                //json = data;
                 jutsuJson = data;
-                if (isColor == "blue"){
+                if (isColor == "red"){
                     displayMarker(jutsuJson,"images/men.png");
                 }
             });
