@@ -106,7 +106,7 @@ socket.on('message',function(data){
 
                      json = data;
 
-                     //console.log(data);
+                     console.log(data);
                     // lon = 77.7157839; 
                     // lat = 12.951234412;
 
@@ -127,7 +127,7 @@ socket.on('message',function(data){
                        var marker = new google.maps.Marker({
                         position: latLng,
                         map: map
-
+                        //icon: images/temp_jutsu.png;
                          });
                        marker.setMap(map);
                      }
@@ -135,8 +135,7 @@ socket.on('message',function(data){
 
 
 
-
-}
+ }
 
 
 
