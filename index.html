@@ -58,7 +58,24 @@
 
     <script>
         var map, GeoMarker, aaa;
-        var val_lat, lat_lon;
+        var val_lat, lat_lon, userJson, jutsuJson;
+        var isColor = "blue";
+        
+        function displayMarker (json, image) {
+            for (var i = 0, length = json.length; i < length; i++) {
+                    var data1 = json[i];
+                    console.log(data1);
+                    lat = data1.location.coordinates[0];
+                    lon = data1.location.coordinates[1];
+                    latLng = new google.maps.LatLng(lat, lon);
+                    var marker = new google.maps.Marker({
+                        position: latLng,
+                        map: map,
+                        icon: image
+                    });
+                    marker.setMap(map);
+                }
+        }
 
         function initialize() {
           var styledMapType = new google.maps.StyledMapType([{"featureType":"all","elementType":"labels.text.fill","stylers":[{"color":"#ffffff"}]},{"featureType":"all","elementType":"labels.text.stroke","stylers":[{"color":"#000000"},{"lightness":13}]},{"featureType":"administrative","elementType":"geometry.fill","stylers":[{"color":"#000000"}]},{"featureType":"administrative","elementType":"geometry.stroke","stylers":[{"color":"#144b53"},{"lightness":14},{"weight":1.4}]},{"featureType":"landscape","elementType":"all","stylers":[{"color":"#08304b"}]},{"featureType":"poi","elementType":"geometry","stylers":[{"color":"#0c4152"},{"lightness":5}]},{"featureType":"road.highway","elementType":"geometry.fill","stylers":[{"color":"#000000"}]},{"featureType":"road.highway","elementType":"geometry.stroke","stylers":[{"color":"#0b434f"},{"lightness":25}]},{"featureType":"road.arterial","elementType":"geometry.fill","stylers":[{"color":"#000000"}]},{"featureType":"road.arterial","elementType":"geometry.stroke","stylers":[{"color":"#0b3d51"},{"lightness":16}]},{"featureType":"road.local","elementType":"geometry","stylers":[{"color":"#000000"}]},{"featureType":"transit","elementType":"all","stylers":[{"color":"#146474"}]},{"featureType":"water","elementType":"all","stylers":[{"color":"#021019"}]}], {
@@ -93,7 +110,7 @@
             });
             GeoMarker.setMap(map);
 
-            val_lat = 76.810297;
+            val_lat = 76.810293;
             val_lon = 29.906944;
 
             var socket = io('http://localhost:3000/myLocation', {
@@ -101,33 +118,18 @@
             });
             var json;
             socket.on('nearbyuser', function(data) {
-                json = data;
-                for (var i = 0, length = json.length; i < length; i++) {
-                    var data1 = json[i];
-                    lat = data1.location.coordinates[0];
-                    lon = data1.location.coordinates[1];
-                    latLng = new google.maps.LatLng(lat, lon);
-                    var marker = new google.maps.Marker({
-                        position: latLng,
-                        map: map,
-                        icon: "images/training-points.png"
-                    });
-                    marker.setMap(map);
+               // json = data;
+                userJson = data;
+                if (isColor == "red"){
+                    displayMarker(userJson,"images/temp-jutsu.png");
                 }
             });
 
-            socket.on('message', function(data) {
-                json = data;
-                for (var i = 0, length = json.length; i < length; i++) {
-                    var data1 = json[i];
-                    lat = data1.location.coordinates[0];
-                    lon = data1.location.coordinates[1];
-                    latLng = new google.maps.LatLng(lat, lon);
-                    var marker = new google.maps.Marker({
-                        position: latLng,
-                        map: map
-                    });
-                    marker.setMap(map);
+            socket.on('nearbyjutsu', function(data) {
+                //json = data;
+                jutsuJson = data;
+                if (isColor == "blue"){
+                    displayMarker(jutsuJson,"images/men.png");
                 }
             });
         }
@@ -139,7 +141,6 @@
         }
 
         $(function() {
-            var isColor = "blue";
             var styledMapType;
             $("#battlemode").click(function() {
               if (isColor == "red") {
