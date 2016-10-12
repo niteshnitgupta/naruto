@@ -51,7 +51,7 @@
 
         .modal-demo {
             background-color: #FFF;
-            width: 600px;
+            width: 700px;
             border: #000 solid 1px;
             border-radius: 10px;
             box-shadow: 0 8px 6px -6px black;
@@ -73,6 +73,8 @@
             right: 15px;
         }
 
+      
+
     </style>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDQa7MiMFpmVONskOlhgPjk0YlVcHfAJnw"></script>
     <script src="js/jquery-2.2.4.js"></script>
@@ -81,15 +83,15 @@
     <link rel="stylesheet" href="custombox/custombox.min.css">
 
     <link rel="css/stylesheet" href="custombox.css"> 
-
+    <link rel="stylesheet" type="text/css" href="css/w3.css">
     <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <script src="bootstrap/js/bootstrap.min.js"></script>
     <script src="js/socket.io-1.4.5.js"></script>
     <script src="custombox/custombox.min.js"></script>
 
     <script>
-        var map, GeoMarker, aaa;
-        var val_lat, lat_lon, userJson, jutsuJson;
+        var map, GeoMarker, aaa,clicked_justu_id, my_user_name="U001";
+        var val_lat, lat_lon,socket, userJson, jutsuJson;
         var isColor = "blue";
         var userMarkers = [];
         var jutsuMarkers = [];
@@ -112,23 +114,52 @@
             for (var i = 0, length = json.length; i < length; i++) {
                 var data1 = json[i];
                 console.log(data1);
-                lat = data1.location.coordinates[1];
-                lon = data1.location.coordinates[0];
+                lat = data1.location.coordinates[0];
+                lon = data1.location.coordinates[1];
                 latLng = new google.maps.LatLng(lat, lon);
                 var marker = new google.maps.Marker({
                     position: latLng,
-                    map: map
+                    map: map,
+                    title:data1.ju
                 });
                 marker.setMap(map);
+
                 marker.addListener('click', function() {
-                    Custombox.open({
-                        target: '#modal',
-                        effect: 'newspaper'
-                    });
+                    //console.log(data1);
+                    socket.emit('getJutsuDetails', {jutsu_id:data1.jutsu_id } ,function(jutsu_data){
+                        clicked_justu_id=data1.jutsu_id;
+                        console.log(jutsu_data);
+                        $("#jutsu_name").html(jutsu_data.jutsu_name);
+                        $("#jutsu_desc").html(jutsu_data.description);
+                        $("#jutsu_attack").html(jutsu_data.attack_power);
+                        $("#jutsu_level_no").html(jutsu_data.jutsu_level);
+                        $("#jutsu_time").html(jutsu_data.time_to_learn);
+                          
+                        Custombox.open({
+                            target: '#modal',
+                            effect: 'newspaper'
+                        }); 
+                   });
+                    
                 });
                 userMarkers.push(marker);
             }
         }
+
+        function addnewjutsu() {
+
+            socket.emit('learnNewJutsu', {username:my_user_name,jutsu_id:clicked_justu_id},function(){   
+            console.log("justu added successfully");    
+
+        });
+
+
+       }
+
+
+
+
+
 
         function initialize() {
           var styledMapType = new google.maps.StyledMapType([{"featureType":"all","elementType":"labels.text.fill","stylers":[{"color":"#ffffff"}]},{"featureType":"all","elementType":"labels.text.stroke","stylers":[{"color":"#000000"},{"lightness":13}]},{"featureType":"administrative","elementType":"geometry.fill","stylers":[{"color":"#000000"}]},{"featureType":"administrative","elementType":"geometry.stroke","stylers":[{"color":"#144b53"},{"lightness":14},{"weight":1.4}]},{"featureType":"landscape","elementType":"all","stylers":[{"color":"#08304b"}]},{"featureType":"poi","elementType":"geometry","stylers":[{"color":"#0c4152"},{"lightness":5}]},{"featureType":"road.highway","elementType":"geometry.fill","stylers":[{"color":"#000000"}]},{"featureType":"road.highway","elementType":"geometry.stroke","stylers":[{"color":"#0b434f"},{"lightness":25}]},{"featureType":"road.arterial","elementType":"geometry.fill","stylers":[{"color":"#000000"}]},{"featureType":"road.arterial","elementType":"geometry.stroke","stylers":[{"color":"#0b3d51"},{"lightness":16}]},{"featureType":"road.local","elementType":"geometry","stylers":[{"color":"#000000"}]},{"featureType":"transit","elementType":"all","stylers":[{"color":"#146474"}]},{"featureType":"water","elementType":"all","stylers":[{"color":"#021019"}]}], {
@@ -163,23 +194,25 @@
             });
             GeoMarker.setMap(map);
 
-            val_lon = 77.71621079999996;
-            val_lat = 12.9508892;
-
-            var socket = io('http://localhost:3000/myLocation', {
-                query: "username=U01&lat=" + val_lat + "&lon=" + val_lon
+            // val_lon = 77.71621079999996;
+            // val_lat = 12.9508892;
+              
+               val_lon = 29.906929;
+            val_lat = 76.810277;
+            socket = io('http://ec2-52-37-148-173.us-west-2.compute.amazonaws.com/myLocation', {
+                query: "username=" + my_user_name + "&lat=" + val_lat + "&lon=" + val_lon
             });
             var json;
             socket.on('nearbyuser', function(data) {
                 userJson = data;
-                if (isColor == "blue"){
+                if (isColor == "red"){
                     displayMarker(userJson,"images/temp-jutsu.png");
                 }
             });
 
             socket.on('nearbyjutsu', function(data) {
                 jutsuJson = data;
-                if (isColor == "red"){
+                if (isColor == "blue"){
                     displayMarker(jutsuJson,"images/men.png");
                 }
             });
@@ -238,6 +271,12 @@
             });
 
         });
+        
+        
+
+
+
+
     </script>
 </head>
 
@@ -288,15 +327,54 @@
         </div>
     </div>
 
-<div id="modal" class="modal-demo">
-    <button type="button" class="close" onclick="Custombox.close();">
-        <span>&times;</span><span class="sr-only">Close</span>
-    </button>
-    <h4 class="title">Modal title</h4>
-    <div class="text">
-        Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
+
+    <div id="modal" class="modal-demo">
+        <button type="button" class="close" onclick="Custombox.close();">
+            <span>&times;</span><span class="sr-only">Close</span>
+        </button>
+        <h4 class="title" id="jutsu_name"></h4>
+        <div class="text">
+            <div class="row">
+                <div class="col-md-6 col-sm-6 col-xs-12">
+                    <img src="images/jutsu2.png" style="width:auto; height:auto;">
+                </div>
+                <div class="col-md-6 col-sm-6 col-xs-12">
+                    <br />
+                </div>
+                <div class="col-md-6 col-sm-6 col-xs-12">
+                    <p style="text-align:justify" id="jutsu_desc">
+                        
+                    </p>
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-6">
+                            <b>Chakra: Wind</b>
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-6">
+                            <b>Jutsu Level: <span id="jutsu_level_no"></span></b>
+                </div>
+                
+                <div class="col-md-6 col-sm-6 col-xs-12">
+                    <br />
+                </div>
+                <div class="col-md-6 col-sm-6 col-xs-12">
+                    <div class="row">
+                        <div class="col-md-6 col-sm-6 col-xs-6">
+                            <b>Attack Power: <span id="jutsu_attack"></span></b>
+                        </div>
+                        <div class="col-md-6 col-sm-6 col-xs-6">
+                            <b>Learning Time: <span id="jutsu_time"></span></b>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-12 col-sm-12 col-xs-12">
+                    <br />
+                </div>
+                <div class="col-md-12 col-sm-12 col-xs-12">
+                    <button id="btn_learn" class="w3-btn w3-white w3-border" style="width:100%" onclick="addnewjutsu()">Learn</button>
+                </div>
+            </div>
+        </div>
     </div>
-</div>
 
 
 </body>
