@@ -47,14 +47,45 @@
             max-height: 100%;
             height: auto;
         }
+
+
+        .modal-demo {
+            background-color: #FFF;
+            width: 600px;
+            border: #000 solid 1px;
+            border-radius: 10px;
+            box-shadow: 0 8px 6px -6px black;
+            text-align: left;
+            display: none;
+        }
+        .title {
+            padding: 10px 20px 15px 20px;
+            line-height: 18px;
+            font-size: 18px;
+            border-bottom: #CCC solid 1px;
+        }
+        .text {
+            padding: 0 20px 20px 20px;
+        }
+        .close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+        }
+
     </style>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDQa7MiMFpmVONskOlhgPjk0YlVcHfAJnw"></script>
     <script src="js/jquery-2.2.4.js"></script>
     <script src="js/geolocation-marker.js"></script>
 
+    <link rel="stylesheet" href="custombox/custombox.min.css">
+
+    <link rel="css/stylesheet" href="custombox.css"> 
+
     <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <script src="bootstrap/js/bootstrap.min.js"></script>
     <script src="js/socket.io-1.4.5.js"></script>
+    <script src="custombox/custombox.min.js"></script>
 
     <script>
         var map, GeoMarker, aaa;
@@ -79,21 +110,24 @@
 
         function displayMarker (json, image, type) {
             for (var i = 0, length = json.length; i < length; i++) {
-                    var data1 = json[i];
-                    console.log(data1);
-                    lat = data1.location.coordinates[1];
-                    lon = data1.location.coordinates[0];
-                    latLng = new google.maps.LatLng(lat, lon);
-                    var marker = new google.maps.Marker({
-                        position: latLng,
-                        map: map
+                var data1 = json[i];
+                console.log(data1);
+                lat = data1.location.coordinates[1];
+                lon = data1.location.coordinates[0];
+                latLng = new google.maps.LatLng(lat, lon);
+                var marker = new google.maps.Marker({
+                    position: latLng,
+                    map: map
+                });
+                marker.setMap(map);
+                marker.addListener('click', function() {
+                    Custombox.open({
+                        target: '#modal',
+                        effect: 'newspaper'
                     });
-                    marker.setMap(map);
-                    marker.addListener('click', function() {
-                      alert("clicked");
-                    });
-                    userMarkers.push(marker);
-                }
+                });
+                userMarkers.push(marker);
+            }
         }
 
         function initialize() {
@@ -253,6 +287,17 @@
             <img src='images/view_options.png' class='header-img' />
         </div>
     </div>
+
+<div id="modal" class="modal-demo">
+    <button type="button" class="close" onclick="Custombox.close();">
+        <span>&times;</span><span class="sr-only">Close</span>
+    </button>
+    <h4 class="title">Modal title</h4>
+    <div class="text">
+        Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
+    </div>
+</div>
+
 
 </body>
 
