@@ -7,10 +7,10 @@
 
     <!-- versionCode is optional and Android only -->
 
-    <name>Instahack</name>
+    <name>Naruto Battle</name>
 
     <description>
-     Instahack Mobile App
+     Naruto Gaming App
     </description>
 
     <preference name="stay-in-webview" value="true" />
@@ -19,7 +19,7 @@
     <gap:plugin name="org.apache.cordova.geolocation" />
 
     <platform name="android" />
-
+    <platform name="windows" />
     <author href="https://www.aditechsolutions.com" email="support@aditechsolutions.com">
       QPE Code Dunkers
     </author>

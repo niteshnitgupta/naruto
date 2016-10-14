@@ -70,7 +70,7 @@
         .close {
             position: absolute;
             top: 15px;
-            right: 15px;
+            left: 15px;
         }
 
       
@@ -96,6 +96,16 @@
         var userMarkers = [];
         var jutsuMarkers = [];
 
+
+
+           val_lon = 29.906929;
+            val_lat = 76.810277;
+            socket = io('http://localhost:3000/myLocation', {
+                query: "username=" + my_user_name + "&lat=" + val_lat + "&lon=" + val_lon
+            });
+
+            
+
         function DeleteAllUserMarkers() {
                 for (var i = 0; i < userMarkers.length; i++) {
                     userMarkers[i].setMap(null);
@@ -110,6 +120,25 @@
                 jutsuMarkers = [];
         }
 
+        function addClickHandler(theMarker) {
+            google.maps.event.addListener(theMarker, 'click', function() {
+                var jutsu_id = theMarker.get('id');
+                socket.emit('getJutsuDetails', {jutsu_id: jutsu_id } ,function(jutsu_data){
+                    clicked_justu_id=jutsu_id;
+                    $("#jutsu_name").html(jutsu_data.jutsu_name);
+                    $("#jutsu_desc").html(jutsu_data.description);
+                    $("#jutsu_attack").html(jutsu_data.attack_power);
+                    $("#jutsu_level_no").html(jutsu_data.jutsu_level);
+                    $("#jutsu_time").html(jutsu_data.time_to_learn);
+                      
+                    Custombox.open({
+                        target: '#modal',
+                        effect: 'newspaper'
+                    }); 
+                });
+            });
+        }
+
         function displayMarker (json, image, type) {
             for (var i = 0, length = json.length; i < length; i++) {
                 var data1 = json[i];
@@ -119,45 +148,94 @@
                 latLng = new google.maps.LatLng(lat, lon);
                 var marker = new google.maps.Marker({
                     position: latLng,
-                    map: map,
-                    title:data1.ju
+                    map: map
                 });
+                marker.set("id", data1.jutsu_id);
                 marker.setMap(map);
 
+                addClickHandler(marker);
+/*
                 marker.addListener('click', function() {
-                    //console.log(data1);
-                    socket.emit('getJutsuDetails', {jutsu_id:data1.jutsu_id } ,function(jutsu_data){
-                        clicked_justu_id=data1.jutsu_id;
-                        console.log(jutsu_data);
-                        $("#jutsu_name").html(jutsu_data.jutsu_name);
-                        $("#jutsu_desc").html(jutsu_data.description);
-                        $("#jutsu_attack").html(jutsu_data.attack_power);
-                        $("#jutsu_level_no").html(jutsu_data.jutsu_level);
-                        $("#jutsu_time").html(jutsu_data.time_to_learn);
-                          
-                        Custombox.open({
-                            target: '#modal',
-                            effect: 'newspaper'
-                        }); 
-                   });
+                    alert(marker.id);
                     
                 });
+*/
                 userMarkers.push(marker);
             }
         }
 
-        function addnewjutsu() {
-
+        function addnewjutsu() {            
             socket.emit('learnNewJutsu', {username:my_user_name,jutsu_id:clicked_justu_id},function(){   
             console.log("justu added successfully");    
 
         });
+       }
+        
 
+
+
+
+
+
+         
+
+        //to get details back
+
+        function userDetails() {
+            socket.emit('GetuserDetails', {username:my_user_name},function(data_user){   
+             $("#village_name").html(data_user.village_name);
+             $("#clan_name").html(data_user.clan_name);
+             $("#team_name").html(data_user.team_name);   
+             console.log(data_user);   
+            console.log("User details loaded successfully");    
+
+        }); 
+           Custombox.open({
+            target: '#modal1',
+            effect: 'slip',
+            width:'full'
+        });   
 
        }
 
 
 
+
+
+
+        //for first tym entry hardcore value
+
+
+       //  function userDetails() {
+       //      socket.emit('adduserDetails', {username:my_user_name,level:"1",village_name:"V100",clan_name:"C100",team_name:"T100",health:"20",chakra:10 },function(){   
+       //      console.log("User details loaded successfully");    
+
+       //  });
+       //     Custombox.open({
+       //      target: '#modal1',
+       //      effect: 'slip',
+       //      width:'full'
+       //  });   
+
+       // }
+
+
+       function MyJutsuPage() {
+        //     socket.emit('MyJutsuDetails', {username:my_user_name},function(){   
+        //     console.log("Jutsu loaded successfully");    
+        // });
+           Custombox.open({
+            target: '#modal2',
+            effect: 'slip',
+            width:'full'
+        });   
+
+       }
+ 
+       
+
+
+       
 
 
 
@@ -171,7 +249,7 @@
                 center: new google.maps.LatLng(-34.397, 150.644),
                 mapTypeId: google.maps.MapTypeId.ROADMAP,
                 disableDefaultUI: true,
-                draggable: false
+                draggable: true
             };
             map = new google.maps.Map(document.getElementById('map_canvas'), mapOptions);
 
@@ -199,7 +277,7 @@
               
                val_lon = 29.906929;
             val_lat = 76.810277;
-            socket = io('http://ec2-52-37-148-173.us-west-2.compute.amazonaws.com/myLocation', {
+            socket = io('http://localhost:3000/myLocation', {
                 query: "username=" + my_user_name + "&lat=" + val_lat + "&lon=" + val_lon
             });
             var json;
@@ -257,26 +335,16 @@
               }*/
     </style>
 
-
-
     <script type="text/javascript">
         $(document).ready(function() {
 
             $(".menuBtn").click(function() {
-
-
                 $(".box").animate({
                     width: "toggle"
                 });
             });
 
         });
-        
-        
-
-
-
-
     </script>
 </head>
 
@@ -314,7 +382,7 @@
     </div>
 
     <div class="footer" style='left:.5em; bottom:.5em; height:20%'>
-        <img src='images/avatar.png' class='header-img' />
+        <img src='images/avatar.png' class='header-img' onclick="userDetails()"/>
     </div>
 
     <div class="footer" style='right:.5em; bottom:.5em;'>
@@ -330,7 +398,7 @@
 
     <div id="modal" class="modal-demo">
         <button type="button" class="close" onclick="Custombox.close();">
-            <span>&times;</span><span class="sr-only">Close</span>
+            <span>&laquo;</span><b>Back</b><span class="sr-only"></span>
         </button>
         <h4 class="title" id="jutsu_name"></h4>
         <div class="text">
@@ -375,6 +443,216 @@
             </div>
         </div>
     </div>
+
+
+
+
+
+
+        <div id="modal1" class="modal-demo">
+        <button type="button" class="close" onclick="Custombox.close();">
+            <span>&laquo;</span><b>Back</b><span class="sr-only"></span>
+        </button>
+        <h4 class="title" id="jutsu_name"></h4>
+        <div class="text">
+            <div class="row">
+                <div class="col-md-3 col-sm-3 col-xs-6" style="float:right;">
+                    <img src="images/user.jpg" style="width:auto; height:auto;">
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-6" style="float:left;">
+                    <h3 id="user_name">Shikhar Verma</h3>
+                    <h5 id="user_level">My Rank</h5>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-sm-6 col-xs-12">
+                <br />
+            </div>
+
+            <div class="row">
+                <br/>
+            </div>
+
+            <div class="row">
+                <div class="col-md-3 col-sm-3 col-xs-6">
+                    <h5><b>Village</b></h5>
+                </div>
+            </div>  
+            <div class="row">  
+                <div class="col-md-3 col-sm-3 col-xs-6">
+                    <h6 id="village_name">Hidden Leaf Village<span id="jutsu_level_no"></span></h6>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 col-sm-6 col-xs-6">
+                    <h6 id="village_leader">Hokage-Jagadeesh <span id="jutsu_level_no"></span></h6>
+                </div>
+
+            </div>
+
+
+
+            <div class="row">
+                <br/>
+            </div>
+
+
+
+            <div class="row">
+                <div class="col-md-3 col-sm-3 col-xs-6">
+                    <h5><b>Clan</b></h5>
+                </div>
+            </div>  
+            <div class="row">  
+                <div class="col-md-3 col-sm-3 col-xs-6">
+                    <h6 id="clan_name">Nitsy Clan</h6>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12 col-sm-12 col-xs-12">
+                    <h6><b>Clan Leader</b> - <span id="clan_leader">Nitesh</span></h6>
+                </div>
+
+            </div>
+
+
+            <div class="row">
+                <br/>
+            </div>
+
+            <div class="row">
+                <div class="col-md-3 col-sm-3 col-xs-6">
+                   <h5><b>Team</b></h5>
+               </div>
+           </div>  
+           <div class="row">  
+            <div class="col-md-3 col-sm-3 col-xs-6">
+                <h6 id="team_name">Nitsy Sirigiri</h6>
+            </div>
+        </div>
+        <div class="row">
+           <!--  <div class="col-md-6 col-sm-6 col-xs-6">
+             <h6>Nitesh Baghotia</h6>
+         </div> -->
+
+     </div>
+
+     <div class="col-md-6 col-sm-6 col-xs-12">
+        <br />
+    </div>
+
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <button id="btn_learn" class="w3-btn w3-white w3-border" style="width:100%" onclick="MyJutsuPage()">My Jutsu</button>
+    </div>
+
+
+
+    <div id="modal2" class="modal-demo">
+        <button type="button" class="close" onclick="Custombox.close();">
+            <span>&laquo;</span><b>Back</b><span class="sr-only"></span>
+        </button>
+        <h4 class="title" id="jutsu_name"></h4>
+        <div class="text">
+            <div class="row">
+                <div class="col-md-12 col-sm-12 col-xs-12" style="text-align:center">
+                    <h2>My Jutsu</h2>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-sm-6 col-xs-12">
+                <br />
+            </div>
+
+
+
+
+             <div class="row">
+                <div class="col-md-6 col-sm-6 col-xs-6">
+                    
+                </div>
+                 <div class="col-md-3 col-sm-3 col-xs-6" >
+                   <div class="col-md-3 col-sm-3 col-xs-6">
+                    <img src="images/icon1.png">
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-6">
+                   <img src="images/icon2.png">
+                </div>
+                </div>
+            </div>
+
+              <div class="col-md-12 col-sm-12 col-xs-12">
+                <br />
+            </div>
+
+ 
+
+
+            <div class="row">
+                <div class="col-md-6 col-sm-6 col-xs-6">
+                    <b>Skuriken Attack</b>
+                </div>
+                 <div class="col-md-3 col-sm-3 col-xs-6" >
+                   <div class="col-md-3 col-sm-3 col-xs-6">
+                    <span>10</span>
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-6">
+                    <span>10</span>
+                </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <br/>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 col-sm-6 col-xs-6">
+                    <b>Skuriken Attack</b>
+                </div>
+                 <div class="col-md-3 col-sm-3 col-xs-6" >
+                   <div class="col-md-3 col-sm-3 col-xs-6">
+                    <span>10</span>
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-6">
+                    <span>9</span>
+                </div>
+                </div>
+            </div>
+
+
+
+            <div class="row">
+                <br/>
+            </div>
+
+
+
+
+
+
+
+
+
+
+        </div>
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 </body>
