@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html>
-
 <head>
     <title>Geolocation Marker Example Usage</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
@@ -47,8 +46,6 @@
             max-height: 100%;
             height: auto;
         }
-
-
         .modal-demo {
             background-color: #FFF;
             width: 700px;
@@ -72,74 +69,60 @@
             top: 15px;
             left: 15px;
         }
-
-      
-
     </style>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDQa7MiMFpmVONskOlhgPjk0YlVcHfAJnw"></script>
     <script src="js/jquery-2.2.4.js"></script>
     <script src="js/geolocation-marker.js"></script>
-
     <link rel="stylesheet" href="custombox/custombox.min.css">
-
-    <link rel="css/stylesheet" href="custombox.css"> 
+    <link rel="css/stylesheet" href="custombox.css">
     <link rel="stylesheet" type="text/css" href="css/w3.css">
     <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <script src="bootstrap/js/bootstrap.min.js"></script>
     <script src="js/socket.io-1.4.5.js"></script>
     <script src="custombox/custombox.min.js"></script>
-
     <script>
-        var map, GeoMarker, aaa,clicked_justu_id, my_user_name="U001";
-        var val_lat, lat_lon,socket, userJson, jutsuJson;
+        var map, GeoMarker, aaa, clicked_justu_id, my_user_name = "U001";
+        var val_lat, lat_lon, socket, userJson, jutsuJson;
         var isColor = "blue";
         var userMarkers = [];
         var jutsuMarkers = [];
-
-
-
-           val_lon = 29.906929;
-            val_lat = 76.810277;
-            socket = io('http://localhost:3000/myLocation', {
-                query: "username=" + my_user_name + "&lat=" + val_lat + "&lon=" + val_lon
-            });
-
-            
-
+        val_lon = 29.906929;
+        val_lat = 76.810277;
+        socket = io('http://localhost:3000/myLocation', {
+            query: "username=" + my_user_name + "&lat=" + val_lat + "&lon=" + val_lon
+        });
         function DeleteAllUserMarkers() {
-                for (var i = 0; i < userMarkers.length; i++) {
-                    userMarkers[i].setMap(null);
-                }
-                userMarkers = [];
+            for (var i = 0; i < userMarkers.length; i++) {
+                userMarkers[i].setMap(null);
+            }
+            userMarkers = [];
         }
-
         function DeleteAllJutsuMarkers() {
-                for (var i = 0; i < jutsuMarkers.length; i++) {
-                    jutsuMarkers[i].setMap(null);
-                }
-                jutsuMarkers = [];
+            for (var i = 0; i < jutsuMarkers.length; i++) {
+                jutsuMarkers[i].setMap(null);
+            }
+            jutsuMarkers = [];
         }
-
         function addClickHandler(theMarker) {
             google.maps.event.addListener(theMarker, 'click', function() {
                 var jutsu_id = theMarker.get('id');
-                socket.emit('getJutsuDetails', {jutsu_id: jutsu_id } ,function(jutsu_data){
-                    clicked_justu_id=jutsu_id;
+                socket.emit('getJutsuDetails', {
+                    jutsu_id: jutsu_id
+                }, function(jutsu_data) {
+                    clicked_justu_id = jutsu_id;
                     $("#jutsu_name").html(jutsu_data.jutsu_name);
                     $("#jutsu_desc").html(jutsu_data.description);
                     $("#jutsu_attack").html(jutsu_data.attack_power);
                     $("#jutsu_level_no").html(jutsu_data.jutsu_level);
                     $("#jutsu_time").html(jutsu_data.time_to_learn);
-                      
                     Custombox.open({
                         target: '#modal',
                         effect: 'newspaper'
-                    }); 
+                    });
                 });
             });
         }
-
-        function displayMarker (json, image, type) {
+        function displayMarker(json, image, type) {
             for (var i = 0, length = json.length; i < length; i++) {
                 var data1 = json[i];
                 console.log(data1);
@@ -152,98 +135,136 @@
                 });
                 marker.set("id", data1.jutsu_id);
                 marker.setMap(map);
-
                 addClickHandler(marker);
-/*
-                marker.addListener('click', function() {
-                    alert(marker.id);
-                    
-                });
-*/
                 userMarkers.push(marker);
             }
         }
-
-        function addnewjutsu() {            
-            socket.emit('learnNewJutsu', {username:my_user_name,jutsu_id:clicked_justu_id},function(){   
-            console.log("justu added successfully");    
-
-        });
-       }
-        
-
-
-
-
-
-
-         
-
-        //to get details back
-
+        function addnewjutsu() {
+            socket.emit('learnNewJutsu', {
+                username: my_user_name,
+                jutsu_id: clicked_justu_id
+            }, function() {
+                console.log("justu added successfully");
+            });
+        }
         function userDetails() {
-            socket.emit('GetuserDetails', {username:my_user_name},function(data_user){   
-             $("#village_name").html(data_user.village_name);
-             $("#clan_name").html(data_user.clan_name);
-             $("#team_name").html(data_user.team_name);   
-             console.log(data_user);   
-            console.log("User details loaded successfully");    
+            socket.emit('GetuserDetails', {
+                username: my_user_name
+            }, function(data_user) {
+                $("#village_name").html(data_user.village_name);
+                $("#clan_name").html(data_user.clan_name);
+                $("#team_name").html(data_user.team_name);
+                console.log(data_user);
+                console.log("User details loaded successfully");
 
-        }); 
-           Custombox.open({
-            target: '#modal1',
-            effect: 'slip',
-            width:'full'
-        });   
-
-       }
-
-
-
-
-
-
-        //for first tym entry hardcore value
-
-
-       //  function userDetails() {
-       //      socket.emit('adduserDetails', {username:my_user_name,level:"1",village_name:"V100",clan_name:"C100",team_name:"T100",health:"20",chakra:10 },function(){   
-       //      console.log("User details loaded successfully");    
-
-       //  });
-       //     Custombox.open({
-       //      target: '#modal1',
-       //      effect: 'slip',
-       //      width:'full'
-       //  });   
-
-       // }
-
-
-       function MyJutsuPage() {
-        //     socket.emit('MyJutsuDetails', {username:my_user_name},function(){   
-        //     console.log("Jutsu loaded successfully");    
-        // });
-           Custombox.open({
-            target: '#modal2',
-            effect: 'slip',
-            width:'full'
-        });   
-
-       }
- 
-       
-
-
-       
-
-
-
+            });
+            Custombox.open({
+                target: '#modal1',
+                effect: 'slip',
+                width: 'full'
+            });
+        }
+        function MyJutsuPage() {
+            Custombox.open({
+                target: '#modal2',
+                effect: 'slip',
+                width: 'full'
+            });
+        }
         function initialize() {
-          var styledMapType = new google.maps.StyledMapType([{"featureType":"all","elementType":"labels.text.fill","stylers":[{"color":"#ffffff"}]},{"featureType":"all","elementType":"labels.text.stroke","stylers":[{"color":"#000000"},{"lightness":13}]},{"featureType":"administrative","elementType":"geometry.fill","stylers":[{"color":"#000000"}]},{"featureType":"administrative","elementType":"geometry.stroke","stylers":[{"color":"#144b53"},{"lightness":14},{"weight":1.4}]},{"featureType":"landscape","elementType":"all","stylers":[{"color":"#08304b"}]},{"featureType":"poi","elementType":"geometry","stylers":[{"color":"#0c4152"},{"lightness":5}]},{"featureType":"road.highway","elementType":"geometry.fill","stylers":[{"color":"#000000"}]},{"featureType":"road.highway","elementType":"geometry.stroke","stylers":[{"color":"#0b434f"},{"lightness":25}]},{"featureType":"road.arterial","elementType":"geometry.fill","stylers":[{"color":"#000000"}]},{"featureType":"road.arterial","elementType":"geometry.stroke","stylers":[{"color":"#0b3d51"},{"lightness":16}]},{"featureType":"road.local","elementType":"geometry","stylers":[{"color":"#000000"}]},{"featureType":"transit","elementType":"all","stylers":[{"color":"#146474"}]},{"featureType":"water","elementType":"all","stylers":[{"color":"#021019"}]}], {
-              name: 'Styled Map'
-          });
-
+            var styledMapType = new google.maps.StyledMapType([{
+                "featureType": "all",
+                "elementType": "labels.text.fill",
+                "stylers": [{
+                    "color": "#ffffff"
+                }]
+            }, {
+                "featureType": "all",
+                "elementType": "labels.text.stroke",
+                "stylers": [{
+                    "color": "#000000"
+                }, {
+                    "lightness": 13
+                }]
+            }, {
+                "featureType": "administrative",
+                "elementType": "geometry.fill",
+                "stylers": [{
+                    "color": "#000000"
+                }]
+            }, {
+                "featureType": "administrative",
+                "elementType": "geometry.stroke",
+                "stylers": [{
+                    "color": "#144b53"
+                }, {
+                    "lightness": 14
+                }, {
+                    "weight": 1.4
+                }]
+            }, {
+                "featureType": "landscape",
+                "elementType": "all",
+                "stylers": [{
+                    "color": "#08304b"
+                }]
+            }, {
+                "featureType": "poi",
+                "elementType": "geometry",
+                "stylers": [{
+                    "color": "#0c4152"
+                }, {
+                    "lightness": 5
+                }]
+            }, {
+                "featureType": "road.highway",
+                "elementType": "geometry.fill",
+                "stylers": [{
+                    "color": "#000000"
+                }]
+            }, {
+                "featureType": "road.highway",
+                "elementType": "geometry.stroke",
+                "stylers": [{
+                    "color": "#0b434f"
+                }, {
+                    "lightness": 25
+                }]
+            }, {
+                "featureType": "road.arterial",
+                "elementType": "geometry.fill",
+                "stylers": [{
+                    "color": "#000000"
+                }]
+            }, {
+                "featureType": "road.arterial",
+                "elementType": "geometry.stroke",
+                "stylers": [{
+                    "color": "#0b3d51"
+                }, {
+                    "lightness": 16
+                }]
+            }, {
+                "featureType": "road.local",
+                "elementType": "geometry",
+                "stylers": [{
+                    "color": "#000000"
+                }]
+            }, {
+                "featureType": "transit",
+                "elementType": "all",
+                "stylers": [{
+                    "color": "#146474"
+                }]
+            }, {
+                "featureType": "water",
+                "elementType": "all",
+                "stylers": [{
+                    "color": "#021019"
+                }]
+            }], {
+                name: 'Styled Map'
+            });
             var mapOptions = {
                 zoom: 20,
                 center: new google.maps.LatLng(-34.397, 150.644),
@@ -252,30 +273,22 @@
                 draggable: true
             };
             map = new google.maps.Map(document.getElementById('map_canvas'), mapOptions);
-
             map.mapTypes.set('styled_map', styledMapType);
             map.setMapTypeId('styled_map');
-
             GeoMarker = new GeolocationMarker();
             GeoMarker.setCircleOptions({
                 fillColor: '#808080'
             });
-
             google.maps.event.addListenerOnce(GeoMarker, 'position_changed', function() {
                 map.setCenter(this.getPosition());
                 map.fitBounds(this.getBounds());
                 $(".gmnoprint").hide();
             });
-
             google.maps.event.addListener(GeoMarker, 'geolocation_error', function(e) {
                 alert('There was an error obtaining your position. Message: ' + e.message);
             });
             GeoMarker.setMap(map);
-
-            // val_lon = 77.71621079999996;
-            // val_lat = 12.9508892;
-              
-               val_lon = 29.906929;
+            val_lon = 29.906929;
             val_lat = 76.810277;
             socket = io('http://localhost:3000/myLocation', {
                 query: "username=" + my_user_name + "&lat=" + val_lat + "&lon=" + val_lon
@@ -283,44 +296,341 @@
             var json;
             socket.on('nearbyuser', function(data) {
                 userJson = data;
-                if (isColor == "red"){
-                    displayMarker(userJson,"images/temp-jutsu.png");
+                if (isColor == "red") {
+                    displayMarker(userJson, "images/temp-jutsu.png");
                 }
             });
-
             socket.on('nearbyjutsu', function(data) {
                 jutsuJson = data;
-                if (isColor == "blue"){
-                    displayMarker(jutsuJson,"images/men.png");
+                if (isColor == "blue") {
+                    displayMarker(jutsuJson, "images/men.png");
                 }
             });
         }
-
         google.maps.event.addDomListener(window, 'load', initialize);
-
         if (!navigator.geolocation) {
             alert('Your browser does not support geolocation');
         }
-
         $(function() {
             var styledMapType;
             $("#battlemode").click(function() {
-              if (isColor == "red") {
-                  isColor = "blue";
-                  styledMapType = new google.maps.StyledMapType([{"featureType":"all","elementType":"labels.text.fill","stylers":[{"color":"#ffffff"}]},{"featureType":"all","elementType":"labels.text.stroke","stylers":[{"color":"#000000"},{"lightness":13}]},{"featureType":"administrative","elementType":"geometry.fill","stylers":[{"color":"#000000"}]},{"featureType":"administrative","elementType":"geometry.stroke","stylers":[{"color":"#144b53"},{"lightness":14},{"weight":1.4}]},{"featureType":"landscape","elementType":"all","stylers":[{"color":"#08304b"}]},{"featureType":"poi","elementType":"geometry","stylers":[{"color":"#0c4152"},{"lightness":5}]},{"featureType":"road.highway","elementType":"geometry.fill","stylers":[{"color":"#000000"}]},{"featureType":"road.highway","elementType":"geometry.stroke","stylers":[{"color":"#0b434f"},{"lightness":25}]},{"featureType":"road.arterial","elementType":"geometry.fill","stylers":[{"color":"#000000"}]},{"featureType":"road.arterial","elementType":"geometry.stroke","stylers":[{"color":"#0b3d51"},{"lightness":16}]},{"featureType":"road.local","elementType":"geometry","stylers":[{"color":"#000000"}]},{"featureType":"transit","elementType":"all","stylers":[{"color":"#146474"}]},{"featureType":"water","elementType":"all","stylers":[{"color":"#021019"}]}], {
-                      name: 'Styled Map'
-                  });
-              } else {
-                  isColor = "red";
-                  styledMapType = new google.maps.StyledMapType([{"featureType":"all","elementType":"geometry","stylers":[{"color":"#000000"}]},{"featureType":"all","elementType":"labels.text.fill","stylers":[{"gamma":0.01},{"lightness":20}]},{"featureType":"all","elementType":"labels.text.stroke","stylers":[{"saturation":-31},{"lightness":-33},{"weight":2},{"gamma":0.8}]},{"featureType":"all","elementType":"labels.icon","stylers":[{"visibility":"off"}]},{"featureType":"administrative.country","elementType":"geometry.fill","stylers":[{"visibility":"off"}]},{"featureType":"administrative.province","elementType":"geometry","stylers":[{"visibility":"off"}]},{"featureType":"administrative.province","elementType":"geometry.fill","stylers":[{"visibility":"off"}]},{"featureType":"administrative.province","elementType":"labels","stylers":[{"visibility":"off"}]},{"featureType":"administrative.province","elementType":"labels.text","stylers":[{"visibility":"off"}]},{"featureType":"administrative.locality","elementType":"geometry.fill","stylers":[{"visibility":"off"}]},{"featureType":"administrative.locality","elementType":"labels.text","stylers":[{"visibility":"off"}]},{"featureType":"administrative.locality","elementType":"labels.text.fill","stylers":[{"color":"#000000"},{"saturation":"100"}]},{"featureType":"administrative.locality","elementType":"labels.text.stroke","stylers":[{"color":"#ffffff"}]},{"featureType":"administrative.neighborhood","elementType":"labels.text","stylers":[{"visibility":"off"}]},{"featureType":"administrative.neighborhood","elementType":"labels.text.fill","stylers":[{"visibility":"off"}]},{"featureType":"administrative.neighborhood","elementType":"labels.icon","stylers":[{"visibility":"off"}]},{"featureType":"administrative.land_parcel","elementType":"labels.text","stylers":[{"visibility":"off"}]},{"featureType":"landscape","elementType":"geometry","stylers":[{"lightness":30},{"saturation":30}]},{"featureType":"landscape.man_made","elementType":"geometry.fill","stylers":[{"color":"#9C2424"}]},{"featureType":"landscape.natural.landcover","elementType":"labels.text","stylers":[{"visibility":"off"}]},{"featureType":"landscape.natural.terrain","elementType":"geometry","stylers":[{"visibility":"off"}]},{"featureType":"landscape.natural.terrain","elementType":"labels.text","stylers":[{"visibility":"off"}]},{"featureType":"poi","elementType":"geometry","stylers":[{"saturation":20}]},{"featureType":"poi","elementType":"labels.text","stylers":[{"visibility":"off"}]},{"featureType":"poi.park","elementType":"geometry","stylers":[{"lightness":20},{"saturation":-20},{"visibility":"off"}]},{"featureType":"poi.park","elementType":"geometry.fill","stylers":[{"visibility":"off"}]},{"featureType":"road","elementType":"geometry","stylers":[{"lightness":10},{"saturation":-30}]},{"featureType":"road","elementType":"geometry.stroke","stylers":[{"saturation":25},{"lightness":25}]},{"featureType":"road","elementType":"labels.text","stylers":[{"visibility":"off"}]},{"featureType":"road.highway","elementType":"geometry.stroke","stylers":[{"visibility":"off"}]},{"featureType":"road.highway","elementType":"labels.text","stylers":[{"visibility":"off"}]},{"featureType":"water","elementType":"all","stylers":[{"lightness":-20}]}], {
-                      name: 'Styled Map'
-                  });
-              }
-              map.mapTypes.set('styled_map', styledMapType);
+                if (isColor == "red") {
+                    isColor = "blue";
+                    styledMapType = new google.maps.StyledMapType([{
+                        "featureType": "all",
+                        "elementType": "labels.text.fill",
+                        "stylers": [{
+                            "color": "#ffffff"
+                        }]
+                    }, {
+                        "featureType": "all",
+                        "elementType": "labels.text.stroke",
+                        "stylers": [{
+                            "color": "#000000"
+                        }, {
+                            "lightness": 13
+                        }]
+                    }, {
+                        "featureType": "administrative",
+                        "elementType": "geometry.fill",
+                        "stylers": [{
+                            "color": "#000000"
+                        }]
+                    }, {
+                        "featureType": "administrative",
+                        "elementType": "geometry.stroke",
+                        "stylers": [{
+                            "color": "#144b53"
+                        }, {
+                            "lightness": 14
+                        }, {
+                            "weight": 1.4
+                        }]
+                    }, {
+                        "featureType": "landscape",
+                        "elementType": "all",
+                        "stylers": [{
+                            "color": "#08304b"
+                        }]
+                    }, {
+                        "featureType": "poi",
+                        "elementType": "geometry",
+                        "stylers": [{
+                            "color": "#0c4152"
+                        }, {
+                            "lightness": 5
+                        }]
+                    }, {
+                        "featureType": "road.highway",
+                        "elementType": "geometry.fill",
+                        "stylers": [{
+                            "color": "#000000"
+                        }]
+                    }, {
+                        "featureType": "road.highway",
+                        "elementType": "geometry.stroke",
+                        "stylers": [{
+                            "color": "#0b434f"
+                        }, {
+                            "lightness": 25
+                        }]
+                    }, {
+                        "featureType": "road.arterial",
+                        "elementType": "geometry.fill",
+                        "stylers": [{
+                            "color": "#000000"
+                        }]
+                    }, {
+                        "featureType": "road.arterial",
+                        "elementType": "geometry.stroke",
+                        "stylers": [{
+                            "color": "#0b3d51"
+                        }, {
+                            "lightness": 16
+                        }]
+                    }, {
+                        "featureType": "road.local",
+                        "elementType": "geometry",
+                        "stylers": [{
+                            "color": "#000000"
+                        }]
+                    }, {
+                        "featureType": "transit",
+                        "elementType": "all",
+                        "stylers": [{
+                            "color": "#146474"
+                        }]
+                    }, {
+                        "featureType": "water",
+                        "elementType": "all",
+                        "stylers": [{
+                            "color": "#021019"
+                        }]
+                    }], {
+                        name: 'Styled Map'
+                    });
+                } else {
+                    isColor = "red";
+                    styledMapType = new google.maps.StyledMapType([{
+                        "featureType": "all",
+                        "elementType": "geometry",
+                        "stylers": [{
+                            "color": "#000000"
+                        }]
+                    }, {
+                        "featureType": "all",
+                        "elementType": "labels.text.fill",
+                        "stylers": [{
+                            "gamma": 0.01
+                        }, {
+                            "lightness": 20
+                        }]
+                    }, {
+                        "featureType": "all",
+                        "elementType": "labels.text.stroke",
+                        "stylers": [{
+                            "saturation": -31
+                        }, {
+                            "lightness": -33
+                        }, {
+                            "weight": 2
+                        }, {
+                            "gamma": 0.8
+                        }]
+                    }, {
+                        "featureType": "all",
+                        "elementType": "labels.icon",
+                        "stylers": [{
+                            "visibility": "off"
+                        }]
+                    }, {
+                        "featureType": "administrative.country",
+                        "elementType": "geometry.fill",
+                        "stylers": [{
+                            "visibility": "off"
+                        }]
+                    }, {
+                        "featureType": "administrative.province",
+                        "elementType": "geometry",
+                        "stylers": [{
+                            "visibility": "off"
+                        }]
+                    }, {
+                        "featureType": "administrative.province",
+                        "elementType": "geometry.fill",
+                        "stylers": [{
+                            "visibility": "off"
+                        }]
+                    }, {
+                        "featureType": "administrative.province",
+                        "elementType": "labels",
+                        "stylers": [{
+                            "visibility": "off"
+                        }]
+                    }, {
+                        "featureType": "administrative.province",
+                        "elementType": "labels.text",
+                        "stylers": [{
+                            "visibility": "off"
+                        }]
+                    }, {
+                        "featureType": "administrative.locality",
+                        "elementType": "geometry.fill",
+                        "stylers": [{
+                            "visibility": "off"
+                        }]
+                    }, {
+                        "featureType": "administrative.locality",
+                        "elementType": "labels.text",
+                        "stylers": [{
+                            "visibility": "off"
+                        }]
+                    }, {
+                        "featureType": "administrative.locality",
+                        "elementType": "labels.text.fill",
+                        "stylers": [{
+                            "color": "#000000"
+                        }, {
+                            "saturation": "100"
+                        }]
+                    }, {
+                        "featureType": "administrative.locality",
+                        "elementType": "labels.text.stroke",
+                        "stylers": [{
+                            "color": "#ffffff"
+                        }]
+                    }, {
+                        "featureType": "administrative.neighborhood",
+                        "elementType": "labels.text",
+                        "stylers": [{
+                            "visibility": "off"
+                        }]
+                    }, {
+                        "featureType": "administrative.neighborhood",
+                        "elementType": "labels.text.fill",
+                        "stylers": [{
+                            "visibility": "off"
+                        }]
+                    }, {
+                        "featureType": "administrative.neighborhood",
+                        "elementType": "labels.icon",
+                        "stylers": [{
+                            "visibility": "off"
+                        }]
+                    }, {
+                        "featureType": "administrative.land_parcel",
+                        "elementType": "labels.text",
+                        "stylers": [{
+                            "visibility": "off"
+                        }]
+                    }, {
+                        "featureType": "landscape",
+                        "elementType": "geometry",
+                        "stylers": [{
+                            "lightness": 30
+                        }, {
+                            "saturation": 30
+                        }]
+                    }, {
+                        "featureType": "landscape.man_made",
+                        "elementType": "geometry.fill",
+                        "stylers": [{
+                            "color": "#9C2424"
+                        }]
+                    }, {
+                        "featureType": "landscape.natural.landcover",
+                        "elementType": "labels.text",
+                        "stylers": [{
+                            "visibility": "off"
+                        }]
+                    }, {
+                        "featureType": "landscape.natural.terrain",
+                        "elementType": "geometry",
+                        "stylers": [{
+                            "visibility": "off"
+                        }]
+                    }, {
+                        "featureType": "landscape.natural.terrain",
+                        "elementType": "labels.text",
+                        "stylers": [{
+                            "visibility": "off"
+                        }]
+                    }, {
+                        "featureType": "poi",
+                        "elementType": "geometry",
+                        "stylers": [{
+                            "saturation": 20
+                        }]
+                    }, {
+                        "featureType": "poi",
+                        "elementType": "labels.text",
+                        "stylers": [{
+                            "visibility": "off"
+                        }]
+                    }, {
+                        "featureType": "poi.park",
+                        "elementType": "geometry",
+                        "stylers": [{
+                            "lightness": 20
+                        }, {
+                            "saturation": -20
+                        }, {
+                            "visibility": "off"
+                        }]
+                    }, {
+                        "featureType": "poi.park",
+                        "elementType": "geometry.fill",
+                        "stylers": [{
+                            "visibility": "off"
+                        }]
+                    }, {
+                        "featureType": "road",
+                        "elementType": "geometry",
+                        "stylers": [{
+                            "lightness": 10
+                        }, {
+                            "saturation": -30
+                        }]
+                    }, {
+                        "featureType": "road",
+                        "elementType": "geometry.stroke",
+                        "stylers": [{
+                            "saturation": 25
+                        }, {
+                            "lightness": 25
+                        }]
+                    }, {
+                        "featureType": "road",
+                        "elementType": "labels.text",
+                        "stylers": [{
+                            "visibility": "off"
+                        }]
+                    }, {
+                        "featureType": "road.highway",
+                        "elementType": "geometry.stroke",
+                        "stylers": [{
+                            "visibility": "off"
+                        }]
+                    }, {
+                        "featureType": "road.highway",
+                        "elementType": "labels.text",
+                        "stylers": [{
+                            "visibility": "off"
+                        }]
+                    }, {
+                        "featureType": "water",
+                        "elementType": "all",
+                        "stylers": [{
+                            "lightness": -20
+                        }]
+                    }], {
+                        name: 'Styled Map'
+                    });
+                }
+                map.mapTypes.set('styled_map', styledMapType);
             });
         });
     </script>
-
     <style type="text/css">
         .box {
             display: none;
@@ -330,72 +640,44 @@
             overflow: hidden;
             background-color: transparent;
         }
-        /*.clear{
-              clear:both;
-              }*/
     </style>
-
     <script type="text/javascript">
         $(document).ready(function() {
-
             $(".menuBtn").click(function() {
                 $(".box").animate({
                     width: "toggle"
                 });
             });
-
         });
     </script>
 </head>
-
 <body>
-
-
-
     <div id="map_canvas"></div>
-
-
-
-
     <div class="footer" id="f1" style='right:1.5em; top:1em;'>
-
         <button class="menuBtn" style="border:none; background-color:transparent; margin-top:0.2em;"> <img src='images/men.png' class='header-img' />
         </button>
-
         <div class="box" style="width:270px; overflow-y:hidden;">
             <ul style="width:100%;list-style:none;height:initial; margin:0px; height:100%;">
-
                 <li class="col-xs-4" style='float:left;text-align: center; width:50%;'>
                     <span><img src='images/health.png' class='header-img' style="height:40%;" /></span>
                 </li>
-
                 <li class="col-xs-4" style='float:right;   text-align: center; width:50%;'><span>
-
                       <img src='images/fighting-points.png' class='header-img' /></span>
-
                 </li>
-
             </ul>
         </div>
-
-
     </div>
-
     <div class="footer" style='left:.5em; bottom:.5em; height:20%'>
-        <img src='images/avatar.png' class='header-img' onclick="userDetails()"/>
+        <img src='images/avatar.png' class='header-img' onclick="userDetails()" />
     </div>
-
     <div class="footer" style='right:.5em; bottom:.5em;'>
         <div style='height:45%; text-align:center;'>
             <img src='images/battlemode.png' class='header-img' id="battlemode" />
         </div>
-
         <div style='height:55%; text-align:center;'>
             <img src='images/view_options.png' class='header-img' />
         </div>
     </div>
-
-
     <div id="modal" class="modal-demo">
         <button type="button" class="close" onclick="Custombox.close();">
             <span>&laquo;</span><b>Back</b><span class="sr-only"></span>
@@ -411,16 +693,14 @@
                 </div>
                 <div class="col-md-6 col-sm-6 col-xs-12">
                     <p style="text-align:justify" id="jutsu_desc">
-                        
                     </p>
                 </div>
                 <div class="col-md-3 col-sm-3 col-xs-6">
-                            <b>Chakra: Wind</b>
+                    <b>Chakra: Wind</b>
                 </div>
                 <div class="col-md-3 col-sm-3 col-xs-6">
-                            <b>Jutsu Level: <span id="jutsu_level_no"></span></b>
+                    <b>Jutsu Level: <span id="jutsu_level_no"></span></b>
                 </div>
-                
                 <div class="col-md-6 col-sm-6 col-xs-12">
                     <br />
                 </div>
@@ -443,13 +723,7 @@
             </div>
         </div>
     </div>
-
-
-
-
-
-
-        <div id="modal1" class="modal-demo">
+    <div id="modal1" class="modal-demo">
         <button type="button" class="close" onclick="Custombox.close();">
             <span>&laquo;</span><b>Back</b><span class="sr-only"></span>
         </button>
@@ -464,21 +738,18 @@
                     <h5 id="user_level">My Rank</h5>
                 </div>
             </div>
-
             <div class="col-md-6 col-sm-6 col-xs-12">
                 <br />
             </div>
-
             <div class="row">
                 <br/>
             </div>
-
             <div class="row">
                 <div class="col-md-3 col-sm-3 col-xs-6">
                     <h5><b>Village</b></h5>
                 </div>
-            </div>  
-            <div class="row">  
+            </div>
+            <div class="row">
                 <div class="col-md-3 col-sm-3 col-xs-6">
                     <h6 id="village_name">Hidden Leaf Village<span id="jutsu_level_no"></span></h6>
                 </div>
@@ -487,23 +758,16 @@
                 <div class="col-md-6 col-sm-6 col-xs-6">
                     <h6 id="village_leader">Hokage-Jagadeesh <span id="jutsu_level_no"></span></h6>
                 </div>
-
             </div>
-
-
-
             <div class="row">
                 <br/>
             </div>
-
-
-
             <div class="row">
                 <div class="col-md-3 col-sm-3 col-xs-6">
                     <h5><b>Clan</b></h5>
                 </div>
-            </div>  
-            <div class="row">  
+            </div>
+            <div class="row">
                 <div class="col-md-3 col-sm-3 col-xs-6">
                     <h6 id="clan_name">Nitsy Clan</h6>
                 </div>
@@ -512,149 +776,91 @@
                 <div class="col-md-12 col-sm-12 col-xs-12">
                     <h6><b>Clan Leader</b> - <span id="clan_leader">Nitesh</span></h6>
                 </div>
-
             </div>
-
-
             <div class="row">
                 <br/>
             </div>
-
             <div class="row">
                 <div class="col-md-3 col-sm-3 col-xs-6">
-                   <h5><b>Team</b></h5>
-               </div>
-           </div>  
-           <div class="row">  
-            <div class="col-md-3 col-sm-3 col-xs-6">
-                <h6 id="team_name">Nitsy Sirigiri</h6>
-            </div>
-        </div>
-        <div class="row">
-           <!--  <div class="col-md-6 col-sm-6 col-xs-6">
-             <h6>Nitesh Baghotia</h6>
-         </div> -->
-
-     </div>
-
-     <div class="col-md-6 col-sm-6 col-xs-12">
-        <br />
-    </div>
-
-    <div class="col-md-12 col-sm-12 col-xs-12">
-        <button id="btn_learn" class="w3-btn w3-white w3-border" style="width:100%" onclick="MyJutsuPage()">My Jutsu</button>
-    </div>
-
-
-
-    <div id="modal2" class="modal-demo">
-        <button type="button" class="close" onclick="Custombox.close();">
-            <span>&laquo;</span><b>Back</b><span class="sr-only"></span>
-        </button>
-        <h4 class="title" id="jutsu_name"></h4>
-        <div class="text">
-            <div class="row">
-                <div class="col-md-12 col-sm-12 col-xs-12" style="text-align:center">
-                    <h2>My Jutsu</h2>
+                    <h5><b>Team</b></h5>
                 </div>
             </div>
-
+            <div class="row">
+                <div class="col-md-3 col-sm-3 col-xs-6">
+                    <h6 id="team_name">Nitsy Sirigiri</h6>
+                </div>
+            </div>
+            <div class="row">
+            </div>
             <div class="col-md-6 col-sm-6 col-xs-12">
                 <br />
             </div>
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                <button id="btn_learn" class="w3-btn w3-white w3-border" style="width:100%" onclick="MyJutsuPage()">My Jutsu</button>
+            </div>
+            <div id="modal2" class="modal-demo">
+                <button type="button" class="close" onclick="Custombox.close();">
+                    <span>&laquo;</span><b>Back</b><span class="sr-only"></span>
+                </button>
+                <h4 class="title" id="jutsu_name"></h4>
+                <div class="text">
+                    <div class="row">
+                        <div class="col-md-12 col-sm-12 col-xs-12" style="text-align:center">
+                            <h2>My Jutsu</h2>
+                        </div>
+                    </div>
 
-
-
-
-             <div class="row">
-                <div class="col-md-6 col-sm-6 col-xs-6">
-                    
-                </div>
-                 <div class="col-md-3 col-sm-3 col-xs-6" >
-                   <div class="col-md-3 col-sm-3 col-xs-6">
-                    <img src="images/icon1.png">
-                </div>
-                <div class="col-md-3 col-sm-3 col-xs-6">
-                   <img src="images/icon2.png">
-                </div>
+                    <div class="col-md-6 col-sm-6 col-xs-12">
+                        <br />
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 col-sm-6 col-xs-6">
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-6">
+                            <div class="col-md-3 col-sm-3 col-xs-6">
+                                <img src="images/icon1.png">
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-6">
+                                <img src="images/icon2.png">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-12 col-sm-12 col-xs-12">
+                        <br />
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 col-sm-6 col-xs-6">
+                            <b>Skuriken Attack</b>
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-6">
+                            <div class="col-md-3 col-sm-3 col-xs-6">
+                                <span>10</span>
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-6">
+                                <span>10</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <br/>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 col-sm-6 col-xs-6">
+                            <b>Skuriken Attack</b>
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-6">
+                            <div class="col-md-3 col-sm-3 col-xs-6">
+                                <span>10</span>
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-6">
+                                <span>9</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <br/>
+                    </div>
                 </div>
             </div>
-
-              <div class="col-md-12 col-sm-12 col-xs-12">
-                <br />
-            </div>
-
- 
-
-
-            <div class="row">
-                <div class="col-md-6 col-sm-6 col-xs-6">
-                    <b>Skuriken Attack</b>
-                </div>
-                 <div class="col-md-3 col-sm-3 col-xs-6" >
-                   <div class="col-md-3 col-sm-3 col-xs-6">
-                    <span>10</span>
-                </div>
-                <div class="col-md-3 col-sm-3 col-xs-6">
-                    <span>10</span>
-                </div>
-                </div>
-            </div>
-
-            <div class="row">
-                <br/>
-            </div>
-
-            <div class="row">
-                <div class="col-md-6 col-sm-6 col-xs-6">
-                    <b>Skuriken Attack</b>
-                </div>
-                 <div class="col-md-3 col-sm-3 col-xs-6" >
-                   <div class="col-md-3 col-sm-3 col-xs-6">
-                    <span>10</span>
-                </div>
-                <div class="col-md-3 col-sm-3 col-xs-6">
-                    <span>9</span>
-                </div>
-                </div>
-            </div>
-
-
-
-            <div class="row">
-                <br/>
-            </div>
-
-
-
-
-
-
-
-
-
-
-        </div>
-    </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 </body>
-
 </html>
