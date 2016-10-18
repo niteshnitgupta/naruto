@@ -88,7 +88,7 @@
         var jutsuMarkers = [];
         val_lon = 29.906929;
         val_lat = 76.810277;
-        socket = io('http://localhost:3000/myLocation', {
+        socket = io('http://localhost:8080/myLocation', {
             query: "username=" + my_user_name + "&lat=" + val_lat + "&lon=" + val_lon
         });
         function DeleteAllUserMarkers() {
@@ -290,9 +290,7 @@
             GeoMarker.setMap(map);
             val_lon = 29.906929;
             val_lat = 76.810277;
-            socket = io('http://localhost:3000/myLocation', {
-                query: "username=" + my_user_name + "&lat=" + val_lat + "&lon=" + val_lon
-            });
+            
             var json;
             socket.on('nearbyuser', function(data) {
                 userJson = data;
