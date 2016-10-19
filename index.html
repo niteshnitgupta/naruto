@@ -36,15 +36,24 @@
     background-size: cover;
   }
   </style>
+  <script type="text/javascript">
+    function click(){
+      window.open('http://localhost:8080/auth/facebook','');
+    }
+
+    window.addEventListener('message', function(event) {
+      $("#userid").text(event.data);
+    });
+  </script>
 </head>
 <body>
-
+<div id="userid">userid will come here</div>
   <img src="images/Picture1.png" style="width:87%; height:auto;" />
   <br /><br /><br /><br />
 
   <div style="padding-bottom:0.4em; font-weight:bold; color :#224f77">Sign In with</div>
 
-  <a class="btn btn-primary" href="http://localhost:8080/auth/facebook" style="width:80%; height:auto; font-size:1.4em;">
+  <a class="btn btn-primary" href="javascript:click();" style="width:80%; height:auto; font-size:1.4em;">
     <span class="fa fa-facebook"></span> &nbsp;&nbsp;&nbsp;Facebook
   </a>
   <br /><br />
