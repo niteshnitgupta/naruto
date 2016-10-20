@@ -81,16 +81,13 @@
     <script src="js/socket.io-1.4.5.js"></script>
     <script src="custombox/custombox.min.js"></script>
     <script>
-        var map, GeoMarker, aaa, clicked_justu_id, my_user_name = "U001";
+        var map, GeoMarker, aaa, clicked_justu_id, my_user_name;
         var val_lat, lat_lon, socket, userJson, jutsuJson;
         var isColor = "blue";
         var userMarkers = [];
         var jutsuMarkers = [];
         val_lon = 29.906929;
         val_lat = 76.810277;
-        socket = io('http://localhost:8080/myLocation', {
-            query: "username=" + my_user_name + "&lat=" + val_lat + "&lon=" + val_lon
-        });
         function DeleteAllUserMarkers() {
             for (var i = 0; i < userMarkers.length; i++) {
                 userMarkers[i].setMap(null);
@@ -310,6 +307,24 @@
             alert('Your browser does not support geolocation');
         }
         $(function() {
+            if (typeof(Storage) !== "undefined") {
+                if (localStorage.getItem("userid")) {
+                    $.get("http://localhost:8080/auth", {token: localStorage.getItem("userid")}).done(function(data) {
+                        if (data === "authorized") {
+                            my_user_name = localStorage.getItem("userid");
+                            socket = io('http://localhost:8080/myLocation', {
+                                query: "username=" + my_user_name + "&lat=" + val_lat + "&lon=" + val_lon
+                            });
+                        } else {
+                            window.location.replace("index.html");
+                        }
+                    });
+                } else {
+                    window.location.replace("index.html");
+                }
+            } else {
+                alert("Mobile not supported");
+            }
             var styledMapType;
             $("#battlemode").click(function() {
                 if (isColor == "red") {

@@ -37,17 +37,32 @@
   }
   </style>
   <script type="text/javascript">
+    $(function() {
+      if (typeof(Storage) !== "undefined") {
+          if (localStorage.getItem("userid")) {
+            $.get("http://localhost:8080/auth", {token: localStorage.getItem("userid")}).done(function(data) {
+              if (data === "authorized") {
+                window.location.replace("map.html");
+              }
+            });
+          }
+      } else {
+          alert("Mobile not supported");
+      }
+    });
+
     function click(){
       window.open('http://localhost:8080/auth/facebook','');
     }
 
     window.addEventListener('message', function(event) {
-      $("#userid").text(event.data);
+      localStorage.setItem("userid", event.data);
+      //$("#userid").text(event.data);
     });
   </script>
 </head>
 <body>
-<div id="userid">userid will come here</div>
+  
   <img src="images/Picture1.png" style="width:87%; height:auto;" />
   <br /><br /><br /><br />
 
