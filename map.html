@@ -86,8 +86,8 @@
         var isColor = "blue";
         var userMarkers = [];
         var jutsuMarkers = [];
-        val_lon = 29.906929;
-        val_lat = 76.810277;
+        var val_lon = 29.906929;
+        var val_lat = 76.810277;
         function DeleteAllUserMarkers() {
             for (var i = 0; i < userMarkers.length; i++) {
                 userMarkers[i].setMap(null);
@@ -153,13 +153,13 @@
                 $("#team_name").html(data_user.team_name);
                 console.log(data_user);
                 console.log("User details loaded successfully");
-
+                Custombox.open({
+                    target: '#modal1',
+                    effect: 'slip',
+                    width: 'full'
+                });
             });
-            Custombox.open({
-                target: '#modal1',
-                effect: 'slip',
-                width: 'full'
-            });
+            
         }
         function MyJutsuPage() {
             Custombox.open({
@@ -277,6 +277,8 @@
                 fillColor: '#808080'
             });
             google.maps.event.addListenerOnce(GeoMarker, 'position_changed', function() {
+                val_lon = this.getPosition().lng();
+                val_lat = this.getPosition().lat();
                 map.setCenter(this.getPosition());
                 map.fitBounds(this.getBounds());
                 $(".gmnoprint").hide();
@@ -285,22 +287,6 @@
                 alert('There was an error obtaining your position. Message: ' + e.message);
             });
             GeoMarker.setMap(map);
-            val_lon = 29.906929;
-            val_lat = 76.810277;
-            
-            var json;
-            socket.on('nearbyuser', function(data) {
-                userJson = data;
-                if (isColor == "red") {
-                    displayMarker(userJson, "images/temp-jutsu.png");
-                }
-            });
-            socket.on('nearbyjutsu', function(data) {
-                jutsuJson = data;
-                if (isColor == "blue") {
-                    displayMarker(jutsuJson, "images/men.png");
-                }
-            });
         }
         google.maps.event.addDomListener(window, 'load', initialize);
         if (!navigator.geolocation) {
@@ -315,6 +301,31 @@
                             socket = io('http://localhost:8080/myLocation', {
                                 query: "username=" + my_user_name + "&lat=" + val_lat + "&lon=" + val_lon
                             });
+                            setInterval(function() {
+                                if (socket !== undefined) {
+                                    socket.emit('updateUserLocation', {
+                                        username: localStorage.getItem("userid"),
+                                        lat: val_lat,
+                                        lon: val_lon
+                                    }, function(data) {
+                                        console.log(localStorage.getItem("userid"));
+                                    });
+/*
+                                    socket.on('nearbyuser', function(data) {
+                                        userJson = data;
+                                        if (isColor == "red") {
+                                            displayMarker(userJson, "images/temp-jutsu.png");
+                                        }
+                                    });
+                                    socket.on('nearbyjutsu', function(data) {
+                                        jutsuJson = data;
+                                        if (isColor == "blue") {
+                                            displayMarker(jutsuJson, "images/men.png");
+                                        }
+                                    });
+*/                                    
+                                }
+                            }, 5 * 1000);
                         } else {
                             window.location.replace("index.html");
                         }
