@@ -43,6 +43,8 @@
             $.get("http://localhost:8080/auth", {token: localStorage.getItem("userid")}).done(function(data) {
               if (data === "authorized") {
                 window.location.replace("map.html");
+              } else {
+                localStorage.removeItem("userid");
               }
             });
           }
@@ -57,7 +59,7 @@
 
     window.addEventListener('message', function(event) {
       localStorage.setItem("userid", event.data);
-      //$("#userid").text(event.data);
+      window.location.replace("map.html");
     });
   </script>
 </head>
